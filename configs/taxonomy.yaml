@@ -1,0 +1,167 @@
+# SAFECALLALIGN — taxonomy (SEED locked 2026-10-15; extended region-by-region)
+#
+# Multi-axis schema per call:
+#   A. fraud_type        — WHAT kind of scam (hierarchical; seed below, extended by region)
+#   B. impersonated_entity — WHO they pretend to be (orthogonal)
+#   C. manipulation_tactics — HOW they pressure (theory-grounded, multi-label)
+#   D. requested_action  — the unsafe ask
+#   E. compliance_level  — none / partial / full
+#
+# Benign is NOT an independent set: every benign call is a NEAR-DOMAIN SIBLING of a
+# fraud type (same domain/context, lawful intent) — see benign_siblings below.
+
+# ---------------------------------------------------------------------------
+# AXIS A — fraud_type
+# SEED = union of TeleAntiFraud-28k (7) + our prior identity_theft = 8.
+# 2.0 adds no new fixed types (open fraud_family grounded in cases).
+# ---------------------------------------------------------------------------
+seed_fraud_types:
+  - key: customer_service   # 客服诈骗
+    source: [TeleAntiFraud-28k, TeleAntiFraud-2.0]
+  - key: bank               # 银行诈骗
+    source: [TeleAntiFraud-28k, TeleAntiFraud-2.0]
+  - key: investment         # 投资诈骗
+    source: [TeleAntiFraud-28k]
+  - key: phishing           # 钓鱼诈骗
+    source: [TeleAntiFraud-28k]
+  - key: kidnapping         # 绑架诈骗 (incl. virtual kidnapping)
+    source: [TeleAntiFraud-28k]
+  - key: lottery            # 彩票诈骗 (prize/sweepstakes/inheritance)
+    source: [TeleAntiFraud-28k]
+  - key: email              # 邮件诈骗
+    source: [TeleAntiFraud-28k]
+  - key: identity_theft     # our prior corpus
+    source: [FraudAlign-MCS]
+
+# Region-by-region EXTENSIONS appended here as we ground them.
+# Each: {key, super_category, regions:[...], sources:[...], maps_to_seed: <key|null>}
+extended_fraud_types:
+  # ---- Region 1: US / global (FBI IC3 2024, FTC) ----
+  - {key: tech_support,            super_category: impersonation,   regions: [US], sources: [FBI IC3 2024, FTC], maps_to_seed: null}
+  - {key: government_impersonation, super_category: impersonation,  regions: [US], sources: [FBI IC3 2024, FTC], maps_to_seed: null}
+  - {key: extortion_sextortion,    super_category: coercion_threat, regions: [US], sources: [FBI IC3 2024], maps_to_seed: null}
+  - {key: family_emergency,        super_category: coercion_threat, regions: [US], sources: [FBI IC3 2024], maps_to_seed: kidnapping}
+  - {key: courier_collection,      super_category: impersonation,   regions: [US], sources: [FBI IC3 2024], maps_to_seed: null}
+  - {key: romance,                 super_category: investment_lure, regions: [US], sources: [FBI IC3 2024, FTC], maps_to_seed: null}
+  - {key: job_task,                super_category: investment_lure, regions: [US], sources: [FBI IC3 2024, FTC], maps_to_seed: null}
+
+  # ---- Region 2: India (I4C / NCRP, RBI, TRAI, CERT-In) ----
+  - {key: digital_arrest,          super_category: coercion_threat,       regions: [IN], sources: [I4C/NCRP, NITI Aayog], maps_to_seed: government_impersonation}
+  - {key: loan_app,                super_category: coercion_threat,       regions: [IN], sources: [I4C/NCRP, RBI], maps_to_seed: null}
+  - {key: upi_payment,             super_category: credential_compromise, regions: [IN], sources: [I4C/NCRP, RBI, NPCI], maps_to_seed: bank}
+  - {key: kyc_update,              super_category: credential_compromise, regions: [IN], sources: [I4C/NCRP, RBI], maps_to_seed: phishing}
+  - {key: electricity_utility,     super_category: impersonation,         regions: [IN], sources: [I4C/NCRP, state DISCOMs], maps_to_seed: government_impersonation}
+  - {key: trai_sim_disconnection,  super_category: impersonation,         regions: [IN], sources: [TRAI, I4C/NCRP], maps_to_seed: government_impersonation}
+  - {key: sim_swap,                super_category: credential_compromise, regions: [IN, global], sources: [TRAI/TAFCOP, I4C], maps_to_seed: identity_theft}
+  - {key: customs_courier,         super_category: coercion_threat,       regions: [IN, global], sources: [I4C/NCRP], maps_to_seed: courier_collection}
+  - {key: marketplace,             super_category: impersonation,         regions: [IN, global], sources: [I4C/NCRP], maps_to_seed: courier_collection}
+  - {key: insurance,               super_category: investment_lure,       regions: [IN], sources: [I4C/NCRP, IRDAI], maps_to_seed: null}
+  - {key: charity_donation,        super_category: impersonation,         regions: [IN, global], sources: [I4C/NCRP, FTC], maps_to_seed: null}
+  # India variants folded into existing types (noted, not duplicated):
+  #   fake_customer_care -> customer_service ; refund_overpayment -> customer_service
+  #   matrimonial -> romance ; KBC-lottery -> lottery ; stock-WhatsApp -> investment/pig_butchering
+
+  # ---- Region 3: Korea (FSS, KNPA, KISA voice-phishing typology) ----
+  - {key: loan_solicitation,   super_category: coercion_threat,       regions: [KR], sources: [FSS, KNPA], maps_to_seed: loan_app}          # 대출사기형: fake loan -> harvest card/bankbook
+  - {key: messenger_phishing,  super_category: impersonation,         regions: [KR], sources: [FSS, KNPA], maps_to_seed: family_emergency}  # 메신저피싱: KakaoTalk family/acquaintance impersonation
+  - {key: account_mule,        super_category: credential_compromise, regions: [KR, global], sources: [FSS, KNPA], maps_to_seed: null}      # 통장/계좌 대여: money-mule recruitment, bankbook/debit-card lending
+  # Korea variants folded into existing types:
+  #   기관사칭형 (prosecutor/police/FSS) -> government_impersonation (tag KR)
+  #   환급/refund -> government_impersonation ; gift-certificate payout -> requested_action buy_gift_cards_or_vouchers
+
+  # ---- Region 4: Indonesia (OJK / Satgas PASTI / IASC) ----
+  - {key: malicious_apk, super_category: credential_compromise, regions: [ID, global], sources: [OJK, Satgas PASTI], maps_to_seed: null}     # APK file (fake invitation/parcel-receipt) -> banking trojan
+  - {key: skimming,      super_category: credential_compromise, regions: [ID, global], sources: [OJK], maps_to_seed: identity_theft}          # card skimming / data capture
+  # Indonesia variants folded into existing types:
+  #   pinjol ilegal -> loan_app (tag ID) ; investasi bodong/ponzi -> investment
+  #   penipuan jual beli online -> marketplace ; lowongan kerja -> job_task ; undian/hadiah -> lottery
+  #   fake call center -> customer_service/tech_support ; love scam -> romance
+
+  # ---- Region 7: Brazil / pt-BR (Febraban, Banco Central, gov.br) ----
+  - {key: account_takeover,    super_category: credential_compromise, regions: [BR, global], sources: [Febraban], maps_to_seed: phishing}          # golpe do WhatsApp clonado: steal app security code -> hijack account -> scam contacts
+  - {key: pix_payment,         super_category: credential_compromise, regions: [BR], sources: [Febraban, Banco Central], maps_to_seed: upi_payment} # golpe do Pix: instant-payment-rail fraud (sibling of upi_payment)
+  - {key: card_pickup_courier, super_category: impersonation,         regions: [BR, global], sources: [Febraban], maps_to_seed: courier_collection} # golpe do motoboy: fake-bank call then a "courier" collects the physical card
+  # Brazil variants folded: falso funcionário de banco -> bank ; falso sequestro -> kidnapping ; vishing -> channel
+
+  # ---- Region 8: China (MPS 公安部 "ten most common" 十大高发) ----
+  - {key: task_rebate,   super_category: investment_lure, regions: [CN, global], sources: [MPS China], maps_to_seed: job_task}  # 刷单返利: order-brushing/commission task scam (China #1), deposit-to-earn trap
+  - {key: credit_repair, super_category: impersonation,   regions: [CN], sources: [MPS China], maps_to_seed: null}               # 虚假征信/信用修复: fix bad credit-record scam
+  # China variants folded:
+  #   冒充公检法 -> digital_arrest ; 杀猪盘 -> pig_butchering/romance ; 虚假网络投资理财 -> investment
+  #   虚假购物 -> marketplace ; 冒充电商物流客服/退款 -> customer_service ; 网络贷款 -> loan_app ; 裸聊敲诈 -> extortion_sextortion
+
+  # ---- Region 6: Vietnam (MPS, NCA) — no NEW types; broadens regions ----
+  #   digital_arrest (giả danh công an/viện kiểm sát, "prove innocence") tag VN
+  #   investment/pig_butchering, lottery (prize/promotion), electricity_utility (điện/nước/viễn thông),
+  #   malicious_apk (fake banking app), job_task ("việc nhẹ lương cao", trafficking element)
+
+  # ---- Region 5: Spain (INCIBE / Policía Nacional) ----
+  # No NEW fraud types; Spain confirms these are GLOBAL and tags them ES:
+  #   electricity_utility (corte de luz), family_emergency ("hijo en apuros" WhatsApp),
+  #   bank, tech_support, government_impersonation, investment/crypto.
+  # Spain surfaces the CHANNEL axis (see `channels` below): vishing/smishing/spoofing.
+
+  # ---- Completeness pass (ACCC Scamwatch, FTC, GSMA, USCIS) ----
+  - {key: immigration_embassy, super_category: impersonation,   regions: [US, global], sources: [USCIS, IC3, ACCC], maps_to_seed: government_impersonation}  # visa/immigration/embassy "fix your status, pay fee / deportation threat" — targets migrants/students
+  - {key: recovery_refund,     super_category: impersonation,   regions: [US, global], sources: [FTC, ACCC], maps_to_seed: null}                              # "you're owed a refund" (remote-access overpayment) + "we'll recover your lost funds for a fee" (re-victimization)
+  - {key: advance_fee,         super_category: investment_lure, regions: [global], sources: [ACCC, FTC], maps_to_seed: lottery}                               # 419 / inheritance / fee-to-release-a-larger-sum
+  # Considered but EXCLUDED (not conversational / folded):
+  #   wangiri one-ring premium-rate -> out of scope (no dialogue) unless user opts in
+  #   remote-access -> tech_support + requested_action:install_app_or_remote_access
+  #   payment redirection -> bec ; medicare/health -> insurance ; debt-collection -> government_impersonation/extortion
+
+subtypes:
+  - {key: pig_butchering, subtype_of: investment, regions: [US], sources: [FBI IC3 2024]}
+  - {key: bec,            subtype_of: email,      regions: [US], sources: [FBI IC3 2024]}
+
+super_categories: [impersonation, investment_lure, credential_compromise, coercion_threat]
+
+# ---------------------------------------------------------------------------
+# AXIS C — manipulation_tactics  (theory-grounded: Cialdini + fear)
+# ---------------------------------------------------------------------------
+manipulation_tactics:
+  - authority           # Cialdini: authority
+  - urgency             # Cialdini: scarcity / time pressure
+  - affinity            # Cialdini: liking
+  - reward              # Cialdini: reciprocity / gain
+  - social_proof        # Cialdini: social proof
+  - commitment          # Cialdini: commitment & consistency
+  - fear                # fear appeals
+  - isolation           # keep victim from consulting others
+  - credential_request  # direct ask for secret/credential
+
+# ---------------------------------------------------------------------------
+# AXIS D — requested_action  (unsafe ask; extend as regions add vectors)
+# ---------------------------------------------------------------------------
+requested_action:
+  [otp_or_verification_code, transfer_or_pay_money, card_or_bank_details,
+   password_or_pin, install_app_or_remote_access, click_link_or_visit_site,
+   personal_identity_info, buy_gift_cards_or_vouchers, crypto_transfer, none, other]
+
+# ---------------------------------------------------------------------------
+# AXIS E — compliance_level
+# ---------------------------------------------------------------------------
+compliance_level: [none, partial, full]
+
+# ---------------------------------------------------------------------------
+# AXIS F — channel / vector  (surfaced by Spain INCIBE; orthogonal to type)
+# How contact is made / escalated. Our calls are voice, but the scam often
+# arrives or escalates across channels.
+# ---------------------------------------------------------------------------
+channel: [voice_call, callback_number, vishing_spoofed_callerid, smishing_sms,
+          whatsapp_or_messenger, email, malicious_link, malicious_app_apk, qr_code]
+
+# ---------------------------------------------------------------------------
+# BENIGN = near-domain lawful sibling per fraud type (shared domain/prefix).
+# ---------------------------------------------------------------------------
+benign_siblings:
+  customer_service: genuine support follow-up on a ticket the customer raised
+  bank: routine legitimate bank/card courtesy call
+  investment: licensed advisor / legitimate account update
+  phishing: legitimate identity verification (never asks the secret itself)
+  lottery: real prize/loyalty reward with no fee or data demand
+  kidnapping: genuine family/welfare check-in call
+  email: legitimate service email/callback follow-up
+  identity_theft: legitimate KYC / account-recovery done via official channel
+  # pure-benign (no fraud sibling) kept for diversity:
+  pure_benign: [delivery, appointment, survey, personal, utility]

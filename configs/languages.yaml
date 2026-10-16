@@ -1,0 +1,91 @@
+# SAFECALLALIGN — canonical language set (LOCKED)
+# 10 variants across 8 base languages + 2 code-switch pairs.
+# Each entry: display name, ISO-ish code, type, script, region used for
+# authority-grounded taxonomy, and the candidate TTS engine (verified later).
+
+languages:
+  - code: en
+    name: English
+    type: monolingual
+    script: Latin
+    region: US/UK (global)
+    tts: xtts-v2
+    grounding_sources: [FTC Consumer Sentinel, FBI IC3, UK Action Fraud/NFIB, FINRA, APWG]
+
+  - code: zh
+    name: Chinese (Mandarin)
+    type: monolingual
+    script: Han
+    region: China
+    tts: xtts-v2
+    grounding_sources: [MPS 96110 anti-fraud, TeleAntiFraud taxonomy, public advisories]
+
+  - code: ko
+    name: Korean
+    type: monolingual
+    script: Hangul
+    region: South Korea
+    tts: xtts-v2
+    grounding_sources: [KISA, KNPA voice-phishing, FSS (Financial Supervisory Service)]
+
+  - code: hi
+    name: Hindi
+    type: monolingual
+    script: Devanagari
+    region: India
+    tts: indic-parler   # xtts-v2 also supports hi; pick by quality
+    grounding_sources: [I4C / NCRP, RBI, CERT-In]
+
+  - code: id
+    name: Indonesian
+    type: monolingual
+    script: Latin
+    region: Indonesia
+    tts: mms-tts        # NOT in xtts-v2
+    grounding_sources: [OJK, Kominfo, Satgas PASTI]
+
+  - code: es
+    name: Spanish
+    type: monolingual
+    script: Latin
+    region: Spain (+ general)
+    tts: xtts-v2
+    grounding_sources: [INCIBE, Policía Nacional, OSI]
+
+  - code: vi
+    name: Vietnamese
+    type: monolingual
+    script: Latin
+    region: Vietnam
+    tts: mms-tts        # NOT in xtts-v2 (or community viXTTS)
+    grounding_sources: [MPS Vietnam, State Bank of Vietnam, public advisories]
+
+  - code: pt
+    name: Portuguese (Brazilian)
+    variant: pt-BR
+    type: monolingual
+    script: Latin
+    region: Brazil
+    tts: xtts-v2
+    grounding_sources: [Febraban, gov.br, Procon, Banco Central do Brasil]
+
+  - code: hi-en
+    name: Hinglish (Hindi–English)
+    type: code-switch
+    base: [hi, en]
+    script: Latin/Devanagari
+    region: India
+    tts: xtts-v2+segmented   # code-switch rendering TBD
+    grounding_sources: [I4C / NCRP, RBI]
+
+  - code: ko-en
+    name: Konglish (Korean–English)
+    type: code-switch
+    base: [ko, en]
+    script: Hangul/Latin
+    region: South Korea
+    tts: xtts-v2+segmented   # code-switch rendering TBD
+    grounding_sources: [KISA, FSS]
+
+# Summary: 8 monolingual base languages (en, zh, ko, hi, id, es, vi, pt-BR)
+# + 2 code-switch (hi-en, ko-en) = 10 variants. LOCKED 2026-10-15.
