@@ -1,0 +1,55 @@
+# SAFECALLALIGN — profile schema (Stage 1), finalized 2026-10-15
+#
+# A profile = a grounded scenario spec that seeds Stage-2 generation. Design follows
+# TeleAntiFraud 2.0's discipline: lean, grounded, every field exists to (1) ground in
+# reality, (2) support the fraud <-> near-domain lawful sibling branch, or (3) seed a
+# label. Speaker emotion/prosody and victim resistance are handled at later stages
+# (TTS / generation), NOT here.
+
+profile_fields:
+
+  # --- identity / grounding ---
+  profile_id:            # unique id
+  fraud_type:            # one of the 39 taxonomy types
+  super_category:        # impersonation | investment_lure | credential_compromise | coercion_threat
+  language:              # one of the 10
+  region:                # grounding region (US, IN, KR, ID, ES, VN, BR, CN, global)
+  case_source:           # provenance: advisory / real-case-abstract id it is grounded in
+  grounding_summary:     # the abstracted real-case pattern this profile expands (TAF 2.0 `abstract`);
+                         # the realism driver — PII-stripped, keeps the modus operandi
+
+  # --- scenario (TeleAntiFraud 2.0 core) ---
+  caller_role:           # who the scammer claims to be  (-> axis B impersonated_entity)
+  receiver_profile:      # brief victim persona (occupation/context), native to the language
+  initial_event:         # the pretext / hook that opens the call
+  risk_node:             # the pivotal unsafe moment  == divergence point / T_c anchor
+  requested_action:      # the unsafe ask            (axis D)
+  planned_tactics: []    # intended manipulation tactics (axis C) to steer generation
+  channel:               # contact / escalation vector (axis F)
+
+  # --- the two branches (divergence-point siblings) ---
+  safe_verification_channel: # what a LEGITIMATE call would use instead (grounds the lawful twin + correct advice)
+  benign_resolution:         # how the lawful sibling safely resolves (shares prefix up to risk_node)
+
+  # --- speakers (your addition; alternated & balanced across the set) ---
+  caller_gender:         # male | female   (balanced)
+  callee_gender:         # male | female   (balanced)
+
+# -------------------------------------------------------------------------
+# DEFERRED to later stages (kept out of the profile, as in TeleAntiFraud):
+#   emotional_arc / prosody / voice  -> Stage 6 (TTS)
+#   victim_resistance_level, escalation pace -> Stage 2 (generation control, sampled)
+#   compliance_level, red_flags/evidence, T_s/T_c/T_h -> Stage 5 (labeling, as outcomes)
+# -------------------------------------------------------------------------
+
+# GENERATION-QUALITY GUARD (so richer metadata does not flatten dialogues):
+#   The profile GUIDES, it does not SCRIPT. planned_tactics/channel/requested_action
+#   are passed to Stage-2 as SOFT hints ("the caller may use ..."), never as fixed
+#   lines. The dialogue is written emergently by the two-agent step; grounding_summary
+#   supplies realism (as TAF 2.0's `abstract` does). This matches TAF 2.0's lean-scenario
+#   discipline while keeping our label consistency.
+
+# Balancing targets for profile generation:
+balance:
+  genders: alternate          # caller/callee genders balanced across each fraud_type x language
+  per_type_per_language: tbd  # coverage target (set at Stage-1 run time)

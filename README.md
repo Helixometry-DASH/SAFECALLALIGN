@@ -26,6 +26,13 @@ scripts/   stage entry points (pending)
 tests/
 ```
 
+## Disclaimer on named entities
+For realism, dialogues reference **real organisation names** (banks, agencies, couriers, apps,
+platforms) and native currency, because scammers impersonate real institutions. **These names
+appear only as the entities that fraudsters *impersonate*; no wrongdoing, affiliation, or
+endorsement by any named organisation is implied.** No real working phone numbers, URLs, links,
+or account numbers are included — those are always placeholders. See `configs/entities.yaml`.
+
 ## Relation to prior work
 Builds on the TeleAntiFraud taxonomy but extends it from Chinese detection to a
 multilingual, mechanism-annotated, intervention-timed setting (~5–6× the fraud-type
