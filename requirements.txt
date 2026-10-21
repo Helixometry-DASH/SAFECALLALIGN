@@ -1,0 +1,19 @@
+# SAFECALLALIGN — Python deps for the generation + QC pipeline (fraudgen env).
+# Serves Qwen2.5-72B-Instruct-AWQ via vLLM for profile generation and the QC judge.
+# Install on a GPU node (A100/H100). Verified versions:
+
+vllm==0.28.0
+transformers==5.16.1
+torch==2.13.0
+accelerate==1.14.0
+json_repair==0.63.4
+PyYAML==6.0.3
+
+# IMPORTANT: pin setuptools — newer setuptools breaks torch.utils.cpp_extension,
+# which makes `from vllm import LLM` fail with "cannot import name 'LLM'".
+setuptools==75.8.0
+
+# Optional (only if you measure audio duration later):
+# mutagen
+# librosa
+# soundfile

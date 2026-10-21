@@ -12,9 +12,9 @@ cd SAFECALLALIGN
 Needs **vLLM + transformers** able to serve **Qwen2.5-72B-Instruct-AWQ**. Create a conda env (here called `fraudgen`):
 ```bash
 conda create -y -n fraudgen python=3.10 && conda activate fraudgen
-pip install "vllm>=0.6" transformers accelerate json_repair pyyaml
-pip install "setuptools==75.8.0"     # IMPORTANT: newer setuptools breaks torch.utils.cpp_extension -> vLLM 'cannot import name LLM'
-# (mutagen only if you later measure audio hours)
+pip install -r requirements.txt
+# requirements.txt pins setuptools==75.8.0 — newer setuptools breaks torch.utils.cpp_extension
+# and makes `from vllm import LLM` fail with "cannot import name 'LLM'".
 ```
 Quick check (on a GPU node):
 ```bash
