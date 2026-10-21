@@ -56,6 +56,23 @@ python scripts/qc_profiles.py --langs en ... --judge --apply --target 2000
 python scripts/qc_profiles.py --langs en ...            # report only (near-dup, no GPU)
 ```
 
+## 5b. Continue straight from Stage 2 (no profile regeneration)
+The **profiles are committed to the repo** (`out/profiles/*.jsonl`, 19,027 QC-clean, 10 langs),
+so after cloning you can **skip Stage 0/1 and go straight to Stage 2** — you do NOT regenerate
+profiles. Stage 2 still *generates dialogues* from them, which needs a **GPU + the 72B model**:
+```bash
+# (env + HF_HOME + FRAUD_LLM set as in §2–3; 72B must be cached)
+# optional: top profiles up to exactly 2000/lang first (small GPU job):
+python scripts/run_profile_generation.py --langs en hi zh ko hi-en id es vi pt ko-en --target 2000
+
+# Stage 2 — two-agent dialogues (fraud + benign divergence siblings):
+python scripts/run_dialogue_generation.py --langs en --limit 10 --smoke     # ~10 pairs to validate first
+python scripts/run_dialogue_generation.py --langs en hi zh ko hi-en id es vi pt ko-en   # full run
+# -> writes out/dialogues/<lang>.jsonl  (2 records/profile: variant=fraud|benign, shared prefix, divergence_turn)
+```
+Note: the committed profiles are the 19,027 QC-clean set (not yet re-topped to 2,000/lang);
+either proceed as-is or run the top-up line above first.
+
 ## 6. Running under Slurm (how we do it)
 Self-contained job that runs the whole finaliser on allocation (edit paths inside):
 ```bash
@@ -68,10 +85,11 @@ Tips learned the hard way:
 - Do **not** use `set -e` around the pipeline (a non-fatal glitch shouldn't release the GPU).
 - If a run was killed, clear GPU zombies on the node: `srun --jobid=<J> --overlap bash -lc 'for p in $(nvidia-smi --query-compute-apps=pid --format=csv,noheader); do kill -9 $p; done'`.
 
-## 7. Moving the generated data
-Profiles live in `out/profiles/` (~24 MB for 20k) and are **git-ignored**. Either:
-- **rsync** them to the new server: `rsync -av out/profiles/ newhost:.../SAFECALLALIGN/out/profiles/`, or
-- **regenerate** from scratch (configs + scripts are in git): run §5. Fully reproducible.
+## 7. The generated data
+Profiles (`out/profiles/*.jsonl`, ~24 MB, 19,027 QC-clean) **are committed to the repo**, so they
+arrive with `git clone` — no transfer or regeneration needed (see §5b). The broader `out/` is still
+git-ignored so future **audio** (large) never bloats the repo; move audio via `rsync` when needed.
+To rebuild profiles from scratch instead, the configs + scripts are all in git (run §5).
 
 ## 8. Secrets / rules
 - Keep the HF token in a file **outside the repo** (`.hf_token`), never commit it.
